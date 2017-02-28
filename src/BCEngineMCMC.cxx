@@ -1880,6 +1880,9 @@ bool BCEngineMCMC::MetropolisPreRun()
         // Check convergence
         if (fMCMCNChains > 1) {
 
+            // copy R values
+            std::vector<double> old_Rvalues = fMCMCRValueParameters;
+            
             // Calculate & check R values
             fMCMCNIterationsConvergenceGlobal = fMCMCCurrentIteration;
             for (unsigned p = 0; p < GetNParameters(); ++p) {
@@ -1905,12 +1908,16 @@ bool BCEngineMCMC::MetropolisPreRun()
                     if (GetParameter(p).Fixed())
                         continue;
 
-                    if (fMCMCRValueParameters[p] < fMCMCRValueParametersCriterion)
+                    if (fMCMCRValueParameters[p] >= fMCMCRValueParametersCriterion) {
+                        if (std::isfinite(fMCMCRValueParameters[p])) {
+                            double change = fMCMCRValueParameters[p] - old_Rvalues[p];
+                            double rel_change = change / (old_Rvalues[p] - fMCMCRValueParametersCriterion) * 100.;
+                            BCLog::OutDetail(Form("         %-*s :  %.03f <-- %+.03f (%+3.0f %%)", fParameters.MaxNameLength(), GetParameter(p).GetName().data(), fMCMCRValueParameters[p], change, rel_change));
+                        }
+                        else
+                            BCLog::OutDetail(Form("         %-*s :  error in calculation", fParameters.MaxNameLength(), GetParameter(p).GetName().data()));
+                    } else
                         BCLog::OutDetail(Form("         %-*s :  %.03f", fParameters.MaxNameLength(), GetParameter(p).GetName().data(), fMCMCRValueParameters[p]));
-                    else if (std::isfinite(fMCMCRValueParameters[p]))
-                        BCLog::OutDetail(Form("         %-*s :  %.03f <-- Greater than threshold", fParameters.MaxNameLength(), GetParameter(p).GetName().data(), fMCMCRValueParameters[p]));
-                    else
-                        BCLog::OutDetail(Form("         %-*s :  error in calculation", fParameters.MaxNameLength(), GetParameter(p).GetName().data()));
                 }
             } // end convergence conditional
         } // end chains>1 conditional
