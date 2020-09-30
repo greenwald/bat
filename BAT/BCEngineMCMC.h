@@ -1173,12 +1173,29 @@ public:
     void PrintParameters(const std::vector<double>& P, void (*output)(const std::string&) = BCLog::OutSummary) const;
 
     /**
+     * Get all BCH1Ds
+     * @return vector of all BCH1Ds */
+    std::vector<BCH1D> GetAllBCH1D() const;
+
+    /**
+     * Get all BCH2Ds
+     * @return vector of all BCH2Ds */
+    std::vector<BCH2D> GetAllBCH2D() const;
+
+    /**
      * Print all marginalizations.
      * @param filename Path to file to print to
      * @param hdiv Number of columns of plots per page
      * @param vdiv Number of rows of plots per page
      * @return Number of plots printed */
     unsigned PrintAllMarginalized(const std::string& filename, unsigned hdiv = 1, unsigned vdiv = 1) const;
+
+    /**
+     * Write all marginalizations to ROOT file.
+     * @param filename Path to file to print to
+     * @param options Options to pass to ROOT at file opening
+     * @return Number of plots printed */
+    unsigned WriteAllMarginalized(const std::string& filename, const std::string& options) const;
 
     /**
      * Print a summary plot for the parameters and user-defined observables.

@@ -14,6 +14,7 @@
 
 #include <TCanvas.h>
 #include <TDirectory.h>
+#include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TLegend.h>
@@ -30,6 +31,25 @@
 void BCAux::SetStyle()
 {
     BCLog::OutWarning("BCAux::SetStyle() is deprecated and no longer does anything. Please do not use it.");
+}
+
+// ---------------------------------------------------------
+void BCAux::DefaultToROOT(std::string& filename)
+{
+    if (filename.empty())
+        return;
+
+    size_t ext_pos = filename.find_last_of(".");
+    if (ext_pos == std::string::npos)
+        filename += ".root";
+    else {
+        std::string ext = filename.substr(ext_pos);
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        if (ext == ".")
+            filename += "root";
+        else if (ext != ".root")
+            filename += ".root";
+    }
 }
 
 // ---------------------------------------------------------
@@ -341,8 +361,13 @@ void BCAux::DrawKnowledgeUpdate(BCHistogramBase& prior, BCHistogramBase& posteri
 }
 
 // ---------------------------------------------------------
-unsigned BCAux::PrintPlots(std::vector<BCH1D>& h1, std::vector<BCH2D>& h2, const std::string& filename, unsigned hdiv, unsigned vdiv)
+unsigned BCAux::PrintPlots(std::vector<BCH1D> h1, std::vector<BCH2D> h2, const std::string& filename, unsigned hdiv, unsigned vdiv)
 {
+    if (filename.empty()) {
+        BCLog::OutWarning("BCAux::PrintPlots : filename empty");
+        return 0;
+    }
+    
     const unsigned nplots = h1.size() + h2.size();
     if (nplots == 0) {
         BCLog::OutWarning("BCAux::PrintPlots : No plots to print");
@@ -422,6 +447,43 @@ unsigned BCAux::PrintPlots(std::vector<BCH1D>& h1, std::vector<BCH2D>& h2, const
     // return total number of drawn histograms
     return nplots;
 }
+
+// ---------------------------------------------------------
+unsigned BCAux::WritePlots(std::vector<BCH1D> h1, std::vector<BCH2D> h2, const std::string& filename, const std::string& options)
+{
+    if (filename.empty()) {
+        BCLog::OutWarning("BCAux::WritePlots : filename empty");
+        return 0;
+    }
+    
+    if (h1.empty() && h2.empty()) {
+        BCLog::OutWarning("BCAux::WritePlots : No plots to print");
+        return 0;
+    }
+
+    TFile* outputfile = TFile::Open(filename.data(), options.data());
+    if (!outputfile->IsOpen() || outputfile->IsZombie()) {
+        BCLog::OutWarning("BCAux::WritePlots : File cannot be opened");
+        return 0;
+    }
+    
+    TCanvas c("c", "canvas");
+    
+    for (size_t i = 0; i < h1.size(); ++i) {
+        c.Clear("D");
+        h1[i].Draw();
+        outputfile->WriteTObject(&c, (std::string("c_") + h1[i].GetHistogram()->GetName()).data());
+    }
+    for (size_t i = 0; i < h2.size(); ++i) {
+        c.Clear("D");
+        h2[i].Draw();
+        outputfile->WriteTObject(&c, (std::string("c_") + h2[i].GetHistogram()->GetName()).data());
+    }
+    outputfile->Close();
+    delete outputfile;
+    return h1.size() + h2.size();
+}
+
 
 // ---------------------------------------------------------
 BCAux::RootSideEffectGuard::RootSideEffectGuard() :

@@ -2929,29 +2929,15 @@ std::vector<std::pair<unsigned, unsigned> > BCEngineMCMC::GetH2DPrintOrder() con
 }
 
 // ---------------------------------------------------------
-unsigned BCEngineMCMC::PrintAllMarginalized(const std::string& filename, unsigned hdiv, unsigned vdiv) const
+std::vector<BCH1D> BCEngineMCMC::GetAllBCH1D() const
 {
-    if (GetNVariables() == 0) {
-        BCLog::OutError("BCEngineMCMC::PrintAllMarginalized : No variables defined!");
-        return 0;
-    }
-
-    if (fH1Marginalized.empty() && fH2Marginalized.empty()) {
-        BCLog::OutError("BCEngineMCMC::PrintAllMarginalized : Marginalized distributions not stored.");
-        return 0;
-    }
-    std::string newFilename(filename);
-    BCAux::DefaultToPDF(newFilename);
-    if (newFilename.empty())
-        return 0;
-
     // Find nonempty H1's
     std::vector<unsigned> H1Indices = GetH1DPrintOrder();
     std::vector<BCH1D> h1;
     h1.reserve(H1Indices.size());
     for (unsigned i = 0; i < H1Indices.size(); ++i) {
         if (GetMarginalizedHistogram(H1Indices[i])->Integral() == 0) { // histogram was never filled in range
-            BCLog::OutWarning(Form("BCEngineMCMC::PrintAllMarginalized : 1D Marginalized histogram for \"%s\" is empty; printing is skipped.", GetVariable(H1Indices[i]).GetName().data()));
+            BCLog::OutWarning(Form("BCEngineMCMC::GetAllBCH1D : 1D Marginalized histogram for \"%s\" is empty; BCH1D is not created.", GetVariable(H1Indices[i]).GetName().data()));
             continue;
         }
         h1.push_back(GetMarginalized(H1Indices[i]));
@@ -2960,7 +2946,12 @@ unsigned BCEngineMCMC::PrintAllMarginalized(const std::string& filename, unsigne
         else
             h1.pop_back();
     }
+    return h1;
+}
 
+// ---------------------------------------------------------
+std::vector<BCH2D> BCEngineMCMC::GetAllBCH2D() const
+{
     // Find nonempty H2's
     std::vector<std::pair<unsigned, unsigned> > H2Coords = GetH2DPrintOrder();
     std::vector<BCH2D> h2;
@@ -2969,7 +2960,7 @@ unsigned BCEngineMCMC::PrintAllMarginalized(const std::string& filename, unsigne
         unsigned i = H2Coords[k].first;
         unsigned j = H2Coords[k].second;
         if (fH2Marginalized[i][j]->Integral() == 0) { // histogram was never filled in range
-            BCLog::OutWarning(Form("BCEngineMCMC::PrintAllMarginalized : 2D Marginalized histogram for \"%s\":\"%s\" is empty; printing is skipped.", GetVariable(i).GetName().data(), GetVariable(i).GetName().data()));
+            BCLog::OutWarning(Form("BCEngineMCMC::GetAllBCH2D : 2D Marginalized histogram for \"%s\":\"%s\" is empty; BCH2D is not created.", GetVariable(i).GetName().data(), GetVariable(i).GetName().data()));
             continue;
         }
         h2.push_back(GetMarginalized(i, j));
@@ -2978,9 +2969,25 @@ unsigned BCEngineMCMC::PrintAllMarginalized(const std::string& filename, unsigne
         else
             h2.pop_back();
     }
-
-    return BCAux::PrintPlots(h1, h2, newFilename, hdiv, vdiv);
+    return h2;
 }
+
+// ---------------------------------------------------------
+unsigned BCEngineMCMC::PrintAllMarginalized(const std::string& filename, unsigned hdiv, unsigned vdiv) const
+{
+    std::string newFilename(filename);
+    BCAux::DefaultToPDF(newFilename);
+    return BCAux::PrintPlots(GetAllBCH1D(), GetAllBCH2D(), newFilename, hdiv, vdiv);
+}
+
+// ---------------------------------------------------------
+unsigned BCEngineMCMC::WriteAllMarginalized(const std::string& filename, const std::string& options) const
+{
+    std::string newFilename(filename);
+    BCAux::DefaultToROOT(newFilename);
+    return BCAux::WritePlots(GetAllBCH1D(), GetAllBCH2D(), newFilename, options);
+}
+
 
 // ---------------------------------------------------------
 unsigned BCEngineMCMC::PrintParameterPlot(const std::string& filename, int npar, double interval_content, std::vector<double> quantiles, bool rescale_ranges) const

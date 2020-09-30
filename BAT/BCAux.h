@@ -73,6 +73,11 @@ private:
 void SetStyle();
 
 /**
+ * Force file extension to be .root if not already .root
+ * @param filename Filename to be altered */
+void DefaultToROOT(std::string& filename);
+
+/**
  * Force file extension to be .pdf if not already .pdf or .ps
  * @param filename Filename to be altered */
 void DefaultToPDF(std::string& filename);
@@ -152,7 +157,16 @@ void DrawKnowledgeUpdate(BCHistogramBase& prior, BCHistogramBase& posterior, boo
  * @param hdiv Number of columns of plots per page
  * @param vdiv Number of rows of plots per page
  * @return Number of plots printed */
-unsigned PrintPlots(std::vector<BCH1D>& h1, std::vector<BCH2D>& h2, const std::string& filename, unsigned hdiv = 1, unsigned vdiv = 1);
+unsigned PrintPlots(std::vector<BCH1D> h1, std::vector<BCH2D> h2, const std::string& filename, unsigned hdiv = 1, unsigned vdiv = 1);
+
+/**
+ * Write plots to ROOT file
+ * @param h1 Vector of 1D histograms to plot
+ * @param h2 Vector of 2D histograms to plot
+ * @param filename Path to file to write to
+ * @param options Options to pass to ROOT when opening file
+ * @return Number of plots written */
+unsigned WritePlots(std::vector<BCH1D> h1, std::vector<BCH2D> h2, const std::string& filename, const std::string& options);
 
 /**
  * A guard object to prevent ROOT from taking over ownership of `TNamed` objects.
