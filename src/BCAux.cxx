@@ -367,7 +367,7 @@ unsigned BCAux::PrintPlots(std::vector<BCH1D> h1, std::vector<BCH2D> h2, const s
         BCLog::OutWarning("BCAux::PrintPlots : filename empty");
         return 0;
     }
-    
+
     const unsigned nplots = h1.size() + h2.size();
     if (nplots == 0) {
         BCLog::OutWarning("BCAux::PrintPlots : No plots to print");
@@ -455,7 +455,7 @@ unsigned BCAux::WritePlots(std::vector<BCH1D> h1, std::vector<BCH2D> h2, const s
         BCLog::OutWarning("BCAux::WritePlots : filename empty");
         return 0;
     }
-    
+
     if (h1.empty() && h2.empty()) {
         BCLog::OutWarning("BCAux::WritePlots : No plots to print");
         return 0;
@@ -466,9 +466,9 @@ unsigned BCAux::WritePlots(std::vector<BCH1D> h1, std::vector<BCH2D> h2, const s
         BCLog::OutWarning("BCAux::WritePlots : File cannot be opened");
         return 0;
     }
-    
+
     TCanvas c("c", "canvas");
-    
+
     for (size_t i = 0; i < h1.size(); ++i) {
         c.Clear("D");
         h1[i].Draw();

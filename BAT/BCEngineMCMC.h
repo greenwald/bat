@@ -1229,10 +1229,21 @@ public:
     bool DrawParameterPlot(unsigned i0, unsigned npar = 0, double interval_content = 68e-2, std::vector<double> quantile_values = std::vector<double>(0), bool rescale_ranges = true) const;
 
     /**
+     * Create correlation matrix for the parameters and return TCanvas containing it.
+     * @return TCanvas containing correlation matrix. */
+    TCanvas* GetDrawnCorrelationMatrix() const;
+
+    /**
      * Print a correlation matrix for the parameters.
      * @param filename Path to file to print correlation matrix to.
      * @return Success of action. */
-    bool PrintCorrelationMatrix(const std::string& filename = "matrix.pdf") const;
+    bool PrintCorrelationMatrix(const std::string& filename) const;
+
+    /**
+     * Write a correlation matrix for the parameters to ROOT file
+     * @param filename Path to file to write correlation matrix to.
+     * @return Success of action. */
+    bool WriteCorrelationMatrix(std::string filename, const std::string& options) const;
 
     /**
      * Print a correlation plot for the parameters.

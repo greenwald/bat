@@ -3325,11 +3325,11 @@ bool BCEngineMCMC::DrawParameterPlot(unsigned i0, unsigned npar, double interval
 }
 
 // ---------------------------------------------------------
-bool BCEngineMCMC::PrintCorrelationMatrix(const std::string& filename) const
+TCanvas* BCEngineMCMC::GetDrawnCorrelationMatrix() const
 {
     if (GetNVariables() == 0) {
-        BCLog::OutError("BCEngineMCMC::PrintCorrelationMatrix : No variables defined!");
-        return 0;
+        BCLog::OutError("BCEngineMCMC::GetDrawnCorrelationMatrix : No variables defined!");
+        return nullptr;
     }
 
     // create histogram
@@ -3368,8 +3368,8 @@ bool BCEngineMCMC::PrintCorrelationMatrix(const std::string& filename) const
     }
 
     // print to file
-    TCanvas c_corr("c_corr_matrix");
-    c_corr.cd();
+    TCanvas* c_corr = new TCanvas("c_corr_matrix");
+    c_corr->cd();
 
     double text_size = std::max<double>(0.005, 0.02 * std::min<double>(1., 5. / GetNVariables()));
 
@@ -3437,9 +3437,48 @@ bool BCEngineMCMC::PrintCorrelationMatrix(const std::string& filename) const
     }
 
     gPad->RedrawAxis();
-    c_corr.Print(filename.data());
 
-    // no error
+    return c_corr;
+}
+
+// ---------------------------------------------------------
+bool BCEngineMCMC::PrintCorrelationMatrix(const std::string& filename) const
+{
+    TCanvas* c_corr = GetDrawnCorrelationMatrix();
+
+    if (!c_corr)
+        return false;
+
+    c_corr->Print(filename.data());
+
+    delete c_corr;
+    return true;
+}
+
+// ---------------------------------------------------------
+bool BCEngineMCMC::WriteCorrelationMatrix(std::string filename, const std::string& options) const
+{
+    BCAux::DefaultToROOT(filename);
+    if (filename.empty())
+        return 0;
+
+    TCanvas* c_corr = GetDrawnCorrelationMatrix();
+
+    if (!c_corr)
+        return false;
+
+    TFile* outputfile = TFile::Open(filename.data(), options.data());
+    if (!outputfile->IsOpen() || outputfile->IsZombie()) {
+        BCLog::OutWarning("BCEngineMCMC::WriteParameterPlot : File cannot be opened");
+        return false;
+    }
+
+    outputfile->WriteTObject(c_corr, "c_corr");
+    outputfile->Close();
+
+    delete c_corr;
+    delete outputfile;
+
     return true;
 }
 
