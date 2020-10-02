@@ -3027,6 +3027,52 @@ unsigned BCEngineMCMC::PrintParameterPlot(std::string filename, int npar, double
 }
 
 // ---------------------------------------------------------
+unsigned BCEngineMCMC::WriteParameterPlot(std::string filename, const std::string& options, int npar, double interval_content, std::vector<double> quantiles, bool rescale_ranges) const
+{
+    BCAux::DefaultToROOT(filename);
+    if (filename.empty())
+        return 0;
+
+    TFile* outputfile = TFile::Open(filename.data(), options.data());
+    if (!outputfile->IsOpen() || outputfile->IsZombie()) {
+        BCLog::OutWarning("BCEngineMCMC::WriteParameterPlot : File cannot be opened");
+        return 0;
+    }
+
+    TCanvas c_par("c_parplot_init");
+    c_par.cd();
+    c_par.SetTicky(1);
+    c_par.SetFrameLineWidth(0);
+    c_par.SetFrameLineColor(0);
+
+    if (npar <= 0) // all parameters on one page, all user-defined observables on the next
+        npar = std::max<int> (GetNParameters(), GetNObservables());
+
+    unsigned canvases_written = 0;
+
+    // parameters first
+    for (unsigned i = 0; i < GetNParameters(); i += npar)
+        if (DrawParameterPlot(i, std::min<int>(npar, GetNParameters() - i), interval_content, quantiles, rescale_ranges)) {
+            outputfile->WriteTObject(&c_par, (std::string("c_par_") + std::to_string(canvases_written)).data());
+            c_par.Clear();
+            ++canvases_written;
+        }
+
+    // then user-defined observables
+    for (unsigned i = GetNParameters(); i < GetNVariables(); i += npar)
+        if (DrawParameterPlot(i, std::min<int>(npar, GetNVariables() - i), interval_content, quantiles, rescale_ranges)) {
+            outputfile->WriteTObject(&c_par, (std::string("c_par_") + std::to_string(canvases_written)).data());
+            c_par.Clear();
+            ++canvases_written;
+        }
+
+    outputfile->WriteTObject(&c_par, (std::string("c_par_") + std::to_string(canvases_written)).data());
+    outputfile->Close();
+    delete outputfile;
+    return canvases_written > 0;
+}
+
+// ---------------------------------------------------------
 bool BCEngineMCMC::DrawParameterPlot(unsigned i0, unsigned npar, double interval_content, std::vector<double> quantiles, bool rescale_ranges) const
 {
 

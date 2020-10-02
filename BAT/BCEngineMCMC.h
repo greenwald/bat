@@ -1192,7 +1192,7 @@ public:
 
     /**
      * Write all marginalizations to ROOT file.
-     * @param filename Path to file to print to
+     * @param filename Path to file to write to
      * @param options Options to pass to ROOT at file opening
      * @return Number of plots printed */
     unsigned WriteAllMarginalized(std::string filename, const std::string& options) const;
@@ -1206,6 +1206,17 @@ public:
      * @param rescale_ranges Flag for rescaling to range surveyed by MCMC chains
      * @return Number of pages printed. */
     unsigned PrintParameterPlot(std::string filename, int npar = 10, double interval_content = 68e-2, std::vector<double> quantile_values = std::vector<double>(0), bool rescale_ranges = true) const;
+
+    /**
+     * Write summary plots for the parameters and user-defined observables.
+     * @param filename Path to filename to write to.
+     * @param options Options to pass to ROOT at file opening
+     * @param npar Number of parameters per canvas, print all on one page if set to zero or negative
+     * @param interval_content Probability mass to display in smallest X interval band
+     * @param quantile_values Vector of quantile values to draw
+     * @param rescale_ranges Flag for rescaling to range surveyed by MCMC chains
+     * @return Number of canvases printed. */
+    unsigned WriteParameterPlot(std::string filename, const std::string& options, int npar = 10, double interval_content = 68e-2, std::vector<double> quantile_values = std::vector<double>(0), bool rescale_ranges = true) const;
 
     /**
      * Draw a summary plot for the parameters in the range provided to current pad
