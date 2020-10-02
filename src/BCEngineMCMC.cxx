@@ -2973,32 +2973,29 @@ std::vector<BCH2D> BCEngineMCMC::GetAllBCH2D() const
 }
 
 // ---------------------------------------------------------
-unsigned BCEngineMCMC::PrintAllMarginalized(const std::string& filename, unsigned hdiv, unsigned vdiv) const
+unsigned BCEngineMCMC::PrintAllMarginalized(std::string filename, unsigned hdiv, unsigned vdiv) const
 {
-    std::string newFilename(filename);
-    BCAux::DefaultToPDF(newFilename);
-    return BCAux::PrintPlots(GetAllBCH1D(), GetAllBCH2D(), newFilename, hdiv, vdiv);
+    BCAux::DefaultToPDF(filename);
+    return BCAux::PrintPlots(GetAllBCH1D(), GetAllBCH2D(), filename, hdiv, vdiv);
 }
 
 // ---------------------------------------------------------
-unsigned BCEngineMCMC::WriteAllMarginalized(const std::string& filename, const std::string& options) const
+unsigned BCEngineMCMC::WriteAllMarginalized(std::string filename, const std::string& options) const
 {
-    std::string newFilename(filename);
-    BCAux::DefaultToROOT(newFilename);
-    return BCAux::WritePlots(GetAllBCH1D(), GetAllBCH2D(), newFilename, options);
+    BCAux::DefaultToROOT(filename);
+    return BCAux::WritePlots(GetAllBCH1D(), GetAllBCH2D(), filename, options);
 }
 
 
 // ---------------------------------------------------------
-unsigned BCEngineMCMC::PrintParameterPlot(const std::string& filename, int npar, double interval_content, std::vector<double> quantiles, bool rescale_ranges) const
+unsigned BCEngineMCMC::PrintParameterPlot(std::string filename, int npar, double interval_content, std::vector<double> quantiles, bool rescale_ranges) const
 {
-    std::string newFilename(filename);
-    BCAux::DefaultToPDF(newFilename);
-    if (newFilename.empty())
+    BCAux::DefaultToPDF(filename);
+    if (filename.empty())
         return 0;
 
     TCanvas c_par("c_parplot_init");
-    c_par.Print(Form("%s[", newFilename.data()));
+    c_par.Print(Form("%s[", filename.data()));
     c_par.cd();
     c_par.SetTicky(1);
     c_par.SetFrameLineWidth(0);
@@ -3012,7 +3009,7 @@ unsigned BCEngineMCMC::PrintParameterPlot(const std::string& filename, int npar,
     // parameters first
     for (unsigned i = 0; i < GetNParameters(); i += npar)
         if (DrawParameterPlot(i, std::min<int>(npar, GetNParameters() - i), interval_content, quantiles, rescale_ranges)) {
-            c_par.Print(newFilename.data());
+            c_par.Print(filename.data());
             c_par.Clear();
             ++pages_printed;
         }
@@ -3020,12 +3017,12 @@ unsigned BCEngineMCMC::PrintParameterPlot(const std::string& filename, int npar,
     // then user-defined observables
     for (unsigned i = GetNParameters(); i < GetNVariables(); i += npar)
         if (DrawParameterPlot(i, std::min<int>(npar, GetNVariables() - i), interval_content, quantiles, rescale_ranges)) {
-            c_par.Print(newFilename.data());
+            c_par.Print(filename.data());
             c_par.Clear();
             ++pages_printed;
         }
 
-    c_par.Print(Form("%s]", newFilename.data()));
+    c_par.Print(Form("%s]", filename.data()));
     return pages_printed > 0;
 }
 

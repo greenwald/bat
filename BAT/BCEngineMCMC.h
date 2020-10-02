@@ -1188,14 +1188,14 @@ public:
      * @param hdiv Number of columns of plots per page
      * @param vdiv Number of rows of plots per page
      * @return Number of plots printed */
-    unsigned PrintAllMarginalized(const std::string& filename, unsigned hdiv = 1, unsigned vdiv = 1) const;
+    unsigned PrintAllMarginalized(std::string filename, unsigned hdiv = 1, unsigned vdiv = 1) const;
 
     /**
      * Write all marginalizations to ROOT file.
      * @param filename Path to file to print to
      * @param options Options to pass to ROOT at file opening
      * @return Number of plots printed */
-    unsigned WriteAllMarginalized(const std::string& filename, const std::string& options) const;
+    unsigned WriteAllMarginalized(std::string filename, const std::string& options) const;
 
     /**
      * Print a summary plot for the parameters and user-defined observables.
@@ -1205,7 +1205,7 @@ public:
      * @param quantile_values Vector of quantile values to draw
      * @param rescale_ranges Flag for rescaling to range surveyed by MCMC chains
      * @return Number of pages printed. */
-    unsigned PrintParameterPlot(const std::string& filename, int npar = 10, double interval_content = 68e-2, std::vector<double> quantile_values = std::vector<double>(0), bool rescale_ranges = true) const;
+    unsigned PrintParameterPlot(std::string filename, int npar = 10, double interval_content = 68e-2, std::vector<double> quantile_values = std::vector<double>(0), bool rescale_ranges = true) const;
 
     /**
      * Draw a summary plot for the parameters in the range provided to current pad
