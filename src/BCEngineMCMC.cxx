@@ -3023,7 +3023,7 @@ unsigned BCEngineMCMC::PrintParameterPlot(std::string filename, int npar, double
         }
 
     c_par.Print(Form("%s]", filename.data()));
-    return pages_printed > 0;
+    return pages_printed;
 }
 
 // ---------------------------------------------------------
